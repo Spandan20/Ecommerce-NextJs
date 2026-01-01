@@ -1,4 +1,11 @@
 import "./globals.css";
+import { Assistant } from "next/font/google";
+
+const assistant = Assistant({
+  weight: ["400", "500", "600", "700", "800"],
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export const metadata = {
   title: "Create Next App",
@@ -8,7 +15,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={` antialiased`}>{children}</body>
+      <body className={`${assistant.className} antialiased`}>{children}</body>
     </html>
   );
 }

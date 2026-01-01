@@ -18,27 +18,53 @@ import { Input } from "@/components/ui/input";
 import ButtonLoading from "@/components/Applications/ButtonLoading";
 import z from "zod";
 import Link from "next/link";
-import { WEBSITE_REGISTER } from "@/routes/WebsiteRoute";
+import { WEBSITE_LOGIN, WEBSITE_REGISTER } from "@/routes/WebsiteRoute";
+import axios from "axios";
 
-const LoginPage = () => {
+const RegisterPage = () => {
   const [loading, setLoading] = useState(false);
 
   const formSchema = zSchema
     .pick({
       email: true,
+      name: true,
+      password: true,
     })
     .extend({
-      password: z.string().min(3, "Password field is required"),
+      confirmPassword: z.string(),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: "Passwords do not match",
+      path: ["confirmPassword"],
     });
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
   const handleLoginSubmit = async (values) => {
-    console.log(values);
+    try {
+      setLoading(true);
+      const { data: registerResponse } = await axios.post(
+        "/api/auth/register",
+        values
+      );
+      if (!registerResponse.success) {
+        throw new Error(registerResponse.message);
+      }
+
+      form.reset();
+      alert(registerResponse.message);
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -60,6 +86,25 @@ const LoginPage = () => {
         <div className="mt-5">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleLoginSubmit)}>
+              <div className="mt-5">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="name"
+                          placeholder="Enter your name"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <div className="mt-5">
                 <FormField
                   control={form.control}
@@ -85,11 +130,30 @@ const LoginPage = () => {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>Create Password</FormLabel>
                       <FormControl>
                         <Input
                           type="password"
-                          placeholder="Enter Password"
+                          placeholder="Create your Password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="mt-5">
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="Confirm your Password"
                           {...field}
                         />
                       </FormControl>
@@ -108,20 +172,12 @@ const LoginPage = () => {
               </div>
               <div className="text-center">
                 <div className=" mt-5 flex justify-center gap-1">
-                  <p>Don&apos;t have an account?</p>
+                  <p>Already have an account?</p>
                   <Link
-                    href={WEBSITE_REGISTER}
+                    href={WEBSITE_LOGIN}
                     className="text-primary cursor-pointer underline"
                   >
-                    Create account!
-                  </Link>
-                </div>
-                <div className="mt-3">
-                  <Link
-                    href=""
-                    className="text-primary cursor-pointer underline"
-                  >
-                    Forgot Password?
+                    Sign In!
                   </Link>
                 </div>
               </div>
@@ -133,4 +189,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;
