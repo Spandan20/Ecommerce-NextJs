@@ -16,56 +16,31 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ButtonLoading from "@/components/Applications/ButtonLoading";
-import z from "zod";
+
 import Link from "next/link";
-import { WEBSITE_REGISTER, WEBSITE_RESETPASSWORD } from "@/routes/WebsiteRoute";
+import { WEBSITE_LOGIN } from "@/routes/WebsiteRoute";
 import axios from "axios";
 import { showToast } from "@/lib/showToast";
 import OTPVerification from "@/components/Applications/OTPVerification";
-import { useDispatch } from "react-redux";
-import { login } from "@/store/reducer/authReducer";
 
-const LoginPage = () => {
-  const dispatch = useDispatch();
-  const [loading, setLoading] = useState(false);
-  const [otpVerificationLoading, setOtpVerificationLoading] = useState(false);
+const ResetPassword = () => {
   const [otpEmail, setOtpEmail] = useState();
+  const [otpVerificationLoading, setOtpVerificationLoading] = useState(false);
+  const [emailVerificationLoading, setEmailVerificationLoading] =
+    useState(false);
+  const formSchema = zSchema.pick({
+    email: true,
+  });
 
-  const formSchema = zSchema
-    .pick({
-      email: true,
-    })
-    .extend({
-      password: z.string().min(3, "Password field is required"),
-    });
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
-      password: "",
     },
   });
-  const handleLoginSubmit = async (values) => {
-    try {
-      setLoading(true);
-      const { data: registerResponse } = await axios.post(
-        "/api/auth/login",
-        values
-      );
-      if (!registerResponse.success) {
-        throw new Error(registerResponse.message);
-      }
-      setOtpEmail(values.email);
-      form.reset();
-      showToast("success", registerResponse.message);
-    } catch (error) {
-      showToast("error", error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  //otp verification
+  const handleEmailVerification = async (values) => {};
+
   const handleOtpVerification = async (values) => {
     try {
       setOtpVerificationLoading(true);
@@ -101,12 +76,12 @@ const LoginPage = () => {
         {!otpEmail ? (
           <>
             <div className="text-center">
-              <h1 className="text-3xl font-bold">Login Into Account</h1>
-              <p>Log into your account by filling out the form below</p>
+              <h1 className="text-3xl font-bold">Reset your password</h1>
+              <p>Enter your email for password reset</p>
             </div>
             <div className="mt-5">
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleLoginSubmit)}>
+                <form onSubmit={form.handleSubmit(handleEmailVerification)}>
                   <div className="mt-5">
                     <FormField
                       control={form.control}
@@ -126,49 +101,22 @@ const LoginPage = () => {
                       )}
                     />
                   </div>
-                  <div className="mt-5">
-                    <FormField
-                      control={form.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="password"
-                              placeholder="Enter Password"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+
                   <div>
                     <ButtonLoading
                       className="mt-5 w-full cursor-pointer"
                       type="submit"
-                      text="Login"
-                      loading={loading}
+                      text="Send OTP"
+                      loading={emailVerificationLoading}
                     />
                   </div>
                   <div className="text-center">
                     <div className=" mt-5 flex justify-center gap-1">
-                      <p>Don&apos;t have an account?</p>
                       <Link
-                        href={WEBSITE_REGISTER}
-                        className="text-primary cursor-pointer underline"
+                        href={WEBSITE_LOGIN}
+                        className="text-secondary-foreground cursor-pointer underline"
                       >
-                        Create account!
-                      </Link>
-                    </div>
-                    <div className="mt-3">
-                      <Link
-                        href={WEBSITE_RESETPASSWORD}
-                        className="text-primary cursor-pointer underline"
-                      >
-                        Forgot Password?
+                        Back to Login
                       </Link>
                     </div>
                   </div>
@@ -188,4 +136,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default ResetPassword;

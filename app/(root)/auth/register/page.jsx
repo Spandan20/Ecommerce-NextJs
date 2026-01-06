@@ -18,8 +18,9 @@ import { Input } from "@/components/ui/input";
 import ButtonLoading from "@/components/Applications/ButtonLoading";
 import z from "zod";
 import Link from "next/link";
-import { WEBSITE_LOGIN, WEBSITE_REGISTER } from "@/routes/WebsiteRoute";
+import { WEBSITE_LOGIN } from "@/routes/WebsiteRoute";
 import axios from "axios";
+import { showToast } from "@/lib/showToast";
 
 const RegisterPage = () => {
   const [loading, setLoading] = useState(false);
@@ -57,11 +58,10 @@ const RegisterPage = () => {
       if (!registerResponse.success) {
         throw new Error(registerResponse.message);
       }
-
       form.reset();
-      alert(registerResponse.message);
+      showToast("success", registerResponse.message);
     } catch (error) {
-      alert(error.message);
+      showToast("error", error.message);
     } finally {
       setLoading(false);
     }

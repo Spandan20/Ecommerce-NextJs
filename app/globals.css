@@ -123,3 +123,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+[data-slot="otp-slot"][data-focus] {
+  outline: 2px solid hsl(var(--ring));
+  border-color: hsl(var(--ring));
+}

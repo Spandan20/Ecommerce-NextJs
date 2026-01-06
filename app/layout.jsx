@@ -1,5 +1,7 @@
+import { Bounce, ToastContainer } from "react-toastify";
 import "./globals.css";
 import { Assistant } from "next/font/google";
+import GlobalProvider from "@/components/Applications/GlobalProvider";
 
 const assistant = Assistant({
   weight: ["400", "500", "600", "700", "800"],
@@ -15,7 +17,24 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${assistant.className} antialiased`}>{children}</body>
+      <body className={`${assistant.className} antialiased`}>
+        <GlobalProvider>
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick={false}
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+            transition={Bounce}
+          />
+          {children}
+        </GlobalProvider>
+      </body>
     </html>
   );
 }
