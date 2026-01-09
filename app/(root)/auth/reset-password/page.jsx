@@ -22,12 +22,15 @@ import { WEBSITE_LOGIN } from "@/routes/WebsiteRoute";
 import axios from "axios";
 import { showToast } from "@/lib/showToast";
 import OTPVerification from "@/components/Applications/OTPVerification";
+import UpdatePassword from "@/components/Applications/UpdatePassword";
 
 const ResetPassword = () => {
   const [otpEmail, setOtpEmail] = useState();
   const [otpVerificationLoading, setOtpVerificationLoading] = useState(false);
   const [emailVerificationLoading, setEmailVerificationLoading] =
     useState(false);
+
+  const [isOtpVerified, setIsOtpVerified] = useState(false);
   const formSchema = zSchema.pick({
     email: true,
   });
@@ -39,21 +42,37 @@ const ResetPassword = () => {
     },
   });
 
-  const handleEmailVerification = async (values) => {};
-
-  const handleOtpVerification = async (values) => {
+  const handleEmailVerification = async (values) => {
     try {
-      setOtpVerificationLoading(true);
+      setEmailVerificationLoading(true);
       const { data: otpResponse } = await axios.post(
-        "/api/auth/verify-otp",
+        "/api/auth/reset-password/send-otp",
         values
       );
       if (!otpResponse.success) {
         throw new Error(otpResponse.message);
       }
-      setOtpEmail("");
+      setOtpEmail(values.email);
       showToast("success", otpResponse.message);
-      dispatch(login(otpResponse.data));
+    } catch (error) {
+      showToast("error", error.message);
+    } finally {
+      setEmailVerificationLoading(false);
+    }
+  };
+
+  const handleOtpVerification = async (values) => {
+    try {
+      setOtpVerificationLoading(true);
+      const { data: otpResponse } = await axios.post(
+        "/api/auth/reset-password/verify-otp",
+        values
+      );
+      if (!otpResponse.success) {
+        throw new Error(otpResponse.message);
+      }
+      showToast("success", otpResponse.message);
+      setIsOtpVerified(true);
     } catch (error) {
       showToast("error", error.message);
     } finally {
@@ -125,11 +144,17 @@ const ResetPassword = () => {
             </div>
           </>
         ) : (
-          <OTPVerification
-            email={otpEmail}
-            loading={otpVerificationLoading}
-            onSubmit={handleOtpVerification}
-          />
+          <>
+            {!isOtpVerified ? (
+              <OTPVerification
+                email={otpEmail}
+                loading={otpVerificationLoading}
+                onSubmit={handleOtpVerification}
+              />
+            ) : (
+              <UpdatePassword email={otpEmail} />
+            )}
+          </>
         )}
       </CardContent>
     </Card>
